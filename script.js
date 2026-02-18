@@ -1,4 +1,4 @@
-// Firebase Config (မင်းရဲ့ Key တွေ ဒီမှာ အစားထိုးပါ)
+// ၁။ Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyDK-icUpAmTIkLGw3uwE5LxcCEUZdzIZuE",
   authDomain: "website-91f5b.firebaseapp.com",
@@ -12,70 +12,104 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// --- UI ပြောင်းလဲတဲ့ Function များ ---
-function showRegister() {
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('register-screen').classList.remove('hidden');
+let currentUser = "";
+
+// ၂။ Notification Permission
+if (Notification.permission !== "granted") {
+    Notification.requestPermission();
 }
 
-function showLogin() {
-    document.getElementById('register-screen').classList.add('hidden');
-    document.getElementById('login-screen').classList.remove('hidden');
+function sendNotification(title, body) {
+    if (Notification.permission === "granted") {
+        new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/682/682055.png" });
+        document.getElementById('notif-sound').play();
+    }
 }
 
-// --- Register Logic ---
+// ၃။ UI Toggle Logic
+function toggleAuth(mode) {
+    document.getElementById('login-box').classList.toggle('hidden', mode === 'reg');
+    document.getElementById('reg-box').classList.toggle('hidden', mode === 'login');
+}
+
+function switchTab(tab) {
+    document.getElementById('feed-tab').classList.toggle('hidden', tab !== 'feed');
+    document.getElementById('chat-tab').classList.toggle('hidden', tab !== 'chat');
+}
+
+// ၄။ Auth Logic
 function register() {
-    const user = document.getElementById('reg-user').value.trim();
-    const pass = document.getElementById('reg-pass').value.trim();
-    
-    if(!user || !pass) return alert("Please fill the requirements!");
+    const u = document.getElementById('r-user').value;
+    const p = document.getElementById('r-pass').value;
+    if(u && p) {
+        db.ref('users/' + u).set({ password: p }).then(() => {
+            alert("Identity Created!");
+            toggleAuth('login');
+        });
+    }
+}
 
-    db.ref('users/' + user).set({ password: pass }).then(() => {
-        alert("Identity Created! Accessing System...");
-        enterDashboard(user); // Register ပြီးတာနဲ့ Dashboard ထဲ တန်းပို့မယ်
+function login() {
+    const u = document.getElementById('l-user').value;
+    const p = document.getElementById('l-pass').value;
+    db.ref('users/' + u).once('value', (s) => {
+        if(s.exists() && s.val().password === p) {
+            currentUser = u;
+            document.getElementById('auth-screen').classList.add('hidden');
+            document.getElementById('app-screen').classList.remove('hidden');
+            document.getElementById('user-tag').innerText = `OPERATOR: ${u}`;
+            initListeners();
+        } else { alert("ACCESS DENIED"); }
     });
 }
 
-// --- Login Logic ---
-function login() {
-    const user = document.getElementById('login-user').value.trim();
-    const pass = document.getElementById('login-pass').value.trim();
+// ၅။ Listeners (Post & Chat)
+function initListeners() {
+    // Post Listener (Newsfeed)
+    db.ref('posts').on('child_added', (s) => {
+        const p = s.val();
+        const list = document.getElementById('feed-list');
+        const img = p.image ? `<img src="${p.image}">` : "";
+        list.innerHTML = `<div class="post"><div class="post-user">${p.user}</div><div>${p.text}</div>${img}</div>` + list.innerHTML;
+        
+        if(p.user !== currentUser) {
+            sendNotification("New Broadcast", `${p.user} posted on feed.`);
+        }
+    });
 
-    db.ref('users/' + user).once('value', (s) => {
-        if(s.exists() && s.val().password === pass) {
-            enterDashboard(user);
-        } else {
-            alert("Access Denied!");
+    // Chat Listener
+    db.ref('chat').on('child_added', (s) => {
+        const m = s.val();
+        const display = document.getElementById('chat-display');
+        display.innerHTML += `<div><b style="color:red">[${m.user}]:</b> ${m.text}</div>`;
+        display.scrollTop = display.scrollHeight;
+        
+        if(m.user !== currentUser) {
+            sendNotification("New Message", `${m.user}: ${m.text}`);
         }
     });
 }
 
-function enterDashboard(user) {
-    document.getElementById('login-screen').classList.add('hidden');
-    document.getElementById('register-screen').classList.add('hidden');
-    document.getElementById('main-system').classList.remove('hidden');
-    document.getElementById('op-name').innerText = user;
-    loadChat();
-}
-
-// --- Chat Logic ---
-function loadChat() {
-    db.ref('messages').on('child_added', (s) => {
-        const m = s.val();
-        document.getElementById('chat-box').innerHTML += `<div><b style="color:red">[${m.user}]:</b> ${m.text}</div>`;
-    });
-}
-
-function sendMsg() {
-    const text = document.getElementById('msg-input').value;
-    const user = document.getElementById('op-name').innerText;
+// ၆။ Action Functions
+function createPost() {
+    const text = document.getElementById('post-desc').value;
+    const img = document.getElementById('post-img-url').value;
     if(text) {
-        db.ref('messages').push({ user, text });
-        document.getElementById('msg-input').value = "";
+        db.ref('posts').push({ user: currentUser, text: text, image: img });
+        document.getElementById('post-desc').value = "";
+        document.getElementById('post-img-url').value = "";
     }
 }
 
-// Matrix Effect (အရင်အတိုင်း)
+function sendChat() {
+    const text = document.getElementById('chat-input').value;
+    if(text) {
+        db.ref('chat').push({ user: currentUser, text: text });
+        document.getElementById('chat-input').value = "";
+    }
+}
+
+// Matrix Background Effect (အရင်အတိုင်း)
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -89,3 +123,4 @@ setInterval(() => {
         drops[i]++;
     });
 }, 35);
+
