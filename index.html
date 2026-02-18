@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>THE VOID | SYSTEM</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>THE VOID | ADVANCED NETWORK</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -10,33 +11,49 @@
 <body>
     <canvas id="matrix"></canvas>
 
-    <div id="login-screen" class="box">
-        <h2>[ LOGIN ]</h2>
-        <input type="text" id="login-user" placeholder="USERNAME...">
-        <input type="password" id="login-pass" placeholder="PASSCODE...">
-        <button onclick="login()">ACCESS SYSTEM</button>
-        <p class="link" onclick="showRegister()">New Operator? Create Identity</p>
-    </div>
-
-    <div id="register-screen" class="box hidden">
-        <h2>[ REGISTER ]</h2>
-        <p style="font-size: 11px; color: #666;">Enter credentials to initialize identity</p>
-        <input type="text" id="reg-user" placeholder="CHOOSE USERNAME...">
-        <input type="password" id="reg-pass" placeholder="CREATE PASSCODE...">
-        <input type="email" id="reg-email" placeholder="ENCRYPTED EMAIL (Optional)...">
-        <button onclick="register()">INITIALIZE IDENTITY</button>
-        <p class="link" onclick="showLogin()">Back to Login</p>
-    </div>
-
-    <div id="main-system" class="hidden">
-        <h1 style="color:red; text-align:center;">SYSTEM ONLINE: <span id="op-name"></span></h1>
-        <div id="chat-box"></div>
-        <div class="input-row">
-            <input type="text" id="msg-input" placeholder="Broadcast message...">
-            <button onclick="sendMsg()">SEND</button>
+    <div id="auth-screen">
+        <div id="login-box" class="box">
+            <h2>[ LOGIN ]</h2>
+            <input type="text" id="l-user" placeholder="USERNAME...">
+            <input type="password" id="l-pass" placeholder="PASSCODE...">
+            <button onclick="login()">ENTER SYSTEM</button>
+            <p class="link" onclick="toggleAuth('reg')">Create New Identity</p>
+        </div>
+        <div id="reg-box" class="box hidden">
+            <h2>[ REGISTER ]</h2>
+            <input type="text" id="r-user" placeholder="CHOOSE USERNAME...">
+            <input type="password" id="r-pass" placeholder="CREATE PASSCODE...">
+            <button onclick="register()">INITIALIZE</button>
+            <p class="link" onclick="toggleAuth('login')">Back to Login</p>
         </div>
     </div>
 
+    <div id="app-screen" class="hidden">
+        <nav class="top-nav">
+            <button onclick="switchTab('feed')">NEWSFEED</button>
+            <button onclick="switchTab('chat')">CHAT ROOM</button>
+            <span id="user-tag"></span>
+        </nav>
+
+        <div id="feed-tab" class="container">
+            <div class="input-card">
+                <textarea id="post-desc" placeholder="Write a broadcast..."></textarea>
+                <input type="text" id="post-img-url" placeholder="Image URL (Optional)...">
+                <button onclick="createPost()">POST TO NETWORK</button>
+            </div>
+            <div id="feed-list"></div>
+        </div>
+
+        <div id="chat-tab" class="container hidden">
+            <div id="chat-display"></div>
+            <div class="chat-controls">
+                <input type="text" id="chat-input" placeholder="Secure message...">
+                <button onclick="sendChat()">SEND</button>
+            </div>
+        </div>
+    </div>
+
+    <audio id="notif-sound" src="https://www.myinstants.com/media/sounds/notification.mp3"></audio>
     <script src="script.js"></script>
 </body>
 </html>
