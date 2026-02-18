@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE VOID | ADVANCED NETWORK</title>
+    <title>THE VOID | ALL-IN-ONE NETWORK</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -16,7 +16,7 @@
             <h2>[ LOGIN ]</h2>
             <input type="text" id="l-user" placeholder="USERNAME...">
             <input type="password" id="l-pass" placeholder="PASSCODE...">
-            <button onclick="login()">ENTER SYSTEM</button>
+            <button onclick="login()">ACCESS SYSTEM</button>
             <p class="link" onclick="toggleAuth('reg')">Create New Identity</p>
         </div>
         <div id="reg-box" class="box hidden">
@@ -30,25 +30,42 @@
 
     <div id="app-screen" class="hidden">
         <nav class="top-nav">
-            <button onclick="switchTab('feed')">NEWSFEED</button>
-            <button onclick="switchTab('chat')">CHAT ROOM</button>
+            <button onclick="switchTab('feed')">FEED</button>
+            <button onclick="switchTab('chat')">CHAT</button>
+            <button onclick="switchTab('profile')">PROFILE</button>
             <span id="user-tag"></span>
         </nav>
 
         <div id="feed-tab" class="container">
             <div class="input-card">
-                <textarea id="post-desc" placeholder="Write a broadcast..."></textarea>
+                <textarea id="post-desc" placeholder="Broadcast to network..."></textarea>
                 <input type="text" id="post-img-url" placeholder="Image URL (Optional)...">
-                <button onclick="createPost()">POST TO NETWORK</button>
+                <button onclick="createPost()">POST</button>
             </div>
             <div id="feed-list"></div>
         </div>
 
         <div id="chat-tab" class="container hidden">
-            <div id="chat-display"></div>
+            <div class="chat-layout">
+                <div id="chat-display"></div>
+                <div id="online-list">
+                    <h4>ONLINE</h4>
+                    <div id="users-inner"></div>
+                </div>
+            </div>
             <div class="chat-controls">
                 <input type="text" id="chat-input" placeholder="Secure message...">
                 <button onclick="sendChat()">SEND</button>
+            </div>
+        </div>
+
+        <div id="profile-tab" class="container hidden">
+            <div class="profile-card">
+                <div class="avatar-box"><img id="my-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"></div>
+                <h2 id="profile-name">---</h2>
+                <input type="text" id="avatar-input" placeholder="New Avatar URL...">
+                <button onclick="updateProfile()">UPDATE IDENTITY</button>
+                <button onclick="location.reload()" style="background:#222; color:#fff; margin-top:10px;">LOGOUT</button>
             </div>
         </div>
     </div>
