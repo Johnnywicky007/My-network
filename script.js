@@ -1,4 +1,4 @@
-// ၁။ Firebase Config
+// ၁။ Firebase Config - မင်းရဲ့ Key တွေ ပြန်ထည့်ပါ
 const firebaseConfig = {
     apiKey: "AIzaSyDK-icUpAmTIkLGw3uwE5LxcCEUZdzIZuE",
   authDomain: "website-91f5b.firebaseapp.com",
@@ -14,37 +14,31 @@ const db = firebase.database();
 
 let currentUser = "";
 
-// ၂။ Notification Permission
-if (Notification.permission !== "granted") {
-    Notification.requestPermission();
-}
-
-function sendNotification(title, body) {
-    if (Notification.permission === "granted") {
-        new Notification(title, { body: body, icon: "https://cdn-icons-png.flaticon.com/512/682/682055.png" });
-        document.getElementById('notif-sound').play();
-    }
-}
-
-// ၃။ UI Toggle Logic
+// ၂။ Core Functions
 function toggleAuth(mode) {
     document.getElementById('login-box').classList.toggle('hidden', mode === 'reg');
     document.getElementById('reg-box').classList.toggle('hidden', mode === 'login');
 }
 
 function switchTab(tab) {
-    document.getElementById('feed-tab').classList.toggle('hidden', tab !== 'feed');
-    document.getElementById('chat-tab').classList.toggle('hidden', tab !== 'chat');
+    document.querySelectorAll('.container').forEach(c => c.classList.add('hidden'));
+    document.getElementById(tab + '-tab').classList.remove('hidden');
 }
 
-// ၄။ Auth Logic
+function sendNotif(t, b) {
+    if (Notification.permission === "granted") {
+        new Notification(t, { body: b });
+        document.getElementById('notif-sound').play();
+    }
+}
+
+// ၃။ Auth Logic
 function register() {
     const u = document.getElementById('r-user').value;
     const p = document.getElementById('r-pass').value;
     if(u && p) {
-        db.ref('users/' + u).set({ password: p }).then(() => {
-            alert("Identity Created!");
-            toggleAuth('login');
+        db.ref('users/' + u).set({ password: p, avatar: "https://cdn-icons-png.flaticon.com/512/149/149071.png" }).then(() => {
+            alert("Success!"); toggleAuth('login');
         });
     }
 }
@@ -57,59 +51,74 @@ function login() {
             currentUser = u;
             document.getElementById('auth-screen').classList.add('hidden');
             document.getElementById('app-screen').classList.remove('hidden');
-            document.getElementById('user-tag').innerText = `OPERATOR: ${u}`;
-            initListeners();
+            document.getElementById('user-tag').innerText = `ID: ${u}`;
+            document.getElementById('profile-name').innerText = u;
+            
+            // Online Status
+            db.ref('online/' + u).set(true);
+            db.ref('online/' + u).onDisconnect().remove();
+            
+            Notification.requestPermission();
+            initApp();
         } else { alert("ACCESS DENIED"); }
     });
 }
 
-// ၅။ Listeners (Post & Chat)
-function initListeners() {
-    // Post Listener (Newsfeed)
+// ၄။ App Logic
+function initApp() {
+    // Feed Listener
     db.ref('posts').on('child_added', (s) => {
         const p = s.val();
         const list = document.getElementById('feed-list');
-        const img = p.image ? `<img src="${p.image}">` : "";
-        list.innerHTML = `<div class="post"><div class="post-user">${p.user}</div><div>${p.text}</div>${img}</div>` + list.innerHTML;
-        
-        if(p.user !== currentUser) {
-            sendNotification("New Broadcast", `${p.user} posted on feed.`);
-        }
+        list.innerHTML = `<div class="post"><div class="post-user">${p.user}</div><div>${p.text}</div>${p.image ? `<img src="${p.image}">` : ""}</div>` + list.innerHTML;
+        if(p.user !== currentUser) sendNotif("New Broadcast", p.user + " posted.");
     });
 
     // Chat Listener
     db.ref('chat').on('child_added', (s) => {
         const m = s.val();
-        const display = document.getElementById('chat-display');
-        display.innerHTML += `<div><b style="color:red">[${m.user}]:</b> ${m.text}</div>`;
-        display.scrollTop = display.scrollHeight;
-        
-        if(m.user !== currentUser) {
-            sendNotification("New Message", `${m.user}: ${m.text}`);
+        db.ref('users/' + m.user + '/avatar').once('value', (av) => {
+            const display = document.getElementById('chat-display');
+            display.innerHTML += `<div><img src="${av.val()}" class="msg-avatar"><b style="color:red">${m.user}:</b> ${m.text}</div>`;
+            display.scrollTop = display.scrollHeight;
+            if(m.user !== currentUser) sendNotif("New Message", m.user + ": " + m.text);
+        });
+    });
+
+    // Online Users Listener
+    db.ref('online').on('value', (s) => {
+        const inner = document.getElementById('users-inner');
+        inner.innerHTML = "";
+        if(s.exists()) {
+            Object.keys(s.val()).forEach(u => {
+                inner.innerHTML += `<div style="color:#00f3ff">● ${u}</div>`;
+            });
         }
+    });
+
+    // Profile Avatar Load
+    db.ref('users/' + currentUser + '/avatar').on('value', (s) => {
+        document.getElementById('my-avatar').src = s.val();
     });
 }
 
-// ၆။ Action Functions
 function createPost() {
-    const text = document.getElementById('post-desc').value;
-    const img = document.getElementById('post-img-url').value;
-    if(text) {
-        db.ref('posts').push({ user: currentUser, text: text, image: img });
-        document.getElementById('post-desc').value = "";
-        document.getElementById('post-img-url').value = "";
-    }
+    const t = document.getElementById('post-desc').value;
+    const i = document.getElementById('post-img-url').value;
+    if(t) { db.ref('posts').push({ user: currentUser, text: t, image: i }); document.getElementById('post-desc').value = ""; }
 }
 
 function sendChat() {
-    const text = document.getElementById('chat-input').value;
-    if(text) {
-        db.ref('chat').push({ user: currentUser, text: text });
-        document.getElementById('chat-input').value = "";
-    }
+    const t = document.getElementById('chat-input').value;
+    if(t) { db.ref('chat').push({ user: currentUser, text: t }); document.getElementById('chat-input').value = ""; }
 }
 
-// Matrix Background Effect (အရင်အတိုင်း)
+function updateProfile() {
+    const url = document.getElementById('avatar-input').value;
+    if(url) { db.ref('users/' + currentUser).update({ avatar: url }); alert("Avatar Updated!"); }
+}
+
+// Matrix Background
 const canvas = document.getElementById('matrix');
 const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth; canvas.height = window.innerHeight;
@@ -123,4 +132,4 @@ setInterval(() => {
         drops[i]++;
     });
 }, 35);
-
+        
