@@ -1,3 +1,4 @@
+// ၁။ Firebase Config
 const firebaseConfig = {
     apiKey: "AIzaSyDK-icUpAmTIkLGw3uwE5LxcCEUZdzIZuE",
   authDomain: "website-91f5b.firebaseapp.com",
@@ -12,27 +13,27 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let currentUser = "";
-const ADMIN_ID = "Ghost"; // Admin ID
+const ADMIN_ID = "Ghost"; // <--- Admin
 
-// Utility Functions
+// ၂။ Security & Parsing
 function escapeHTML(str) {
     if (!str) return "";
     return str.replace(/[&<>"']/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m]));
 }
 
 function parseMentions(text) {
-    return text.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
+    return text.replace(/@(\w+)/g, '<span class="mention" style="color:#00f3ff; font-weight:bold;">@$1</span>');
 }
 
-// Session Logic
+// ၃။ Auth & Session
 function checkSession() {
     const saved = localStorage.getItem("void_session");
     if (saved) { currentUser = saved; enterApp(); }
 }
+
 function saveSession(u) { localStorage.setItem("void_session", u); }
 function logout() { localStorage.removeItem("void_session"); location.reload(); }
 
-// Auth Logic
 function toggleAuth(mode) {
     document.getElementById('login-box').classList.toggle('hidden', mode === 'reg');
     document.getElementById('reg-box').classList.toggle('hidden', mode === 'login');
@@ -62,9 +63,14 @@ function enterApp() {
     document.getElementById('app-screen').classList.remove('hidden');
     document.getElementById('user-tag').innerText = `NODE: ${currentUser}`;
     document.getElementById('profile-name').innerText = currentUser;
+
+    // Admin ဆိုရင် Alert ပေးမယ် (Check လုပ်ဖို့)
+    if(currentUser === ADMIN_ID) {
+        console.log("ADMIN PRIVILEGES ACTIVATED");
+    }
+
     db.ref('online/' + currentUser).set(true);
     db.ref('online/' + currentUser).onDisconnect().remove();
-    Notification.requestPermission();
     initListeners();
 }
 
@@ -73,7 +79,7 @@ function switchTab(t) {
     document.getElementById(t + '-tab').classList.remove('hidden');
 }
 
-// Main Listeners
+// ၄။ Main Listeners (Admin Power တွေ ဒီထဲမှာ ပါတယ်)
 function initListeners() {
     // Newsfeed + Comments
     db.ref('posts').on('value', s => {
@@ -81,90 +87,22 @@ function initListeners() {
         list.innerHTML = "";
         s.forEach(child => {
             const p = child.val(), key = child.key;
-            const delBtn = (currentUser === ADMIN_ID) ? `<button style="float:right; background:none; color:red; border:1px solid red; font-size:10px;" onclick="deleteData('posts/${key}')">X</button>` : "";
             
-            let cmtHtml = `<div class="comment-section">`;
+            // ADMIN စစ်ဆေးချက် - တူရင် ဖျက်တဲ့ခလုတ် ပေါ်မယ်
+            const delBtn = (currentUser === ADMIN_ID) ? 
+                `<button style="float:right; background:none; color:red; border:1px solid red; font-size:10px; cursor:pointer;" onclick="deleteData('posts/${key}')">TERMINATE [X]</button>` : "";
+            
+            // Admin Badge စစ်ဆေးချက်
+            const adminBadge = (p.user === ADMIN_ID) ? `<span style="background:red; color:white; font-size:9px; padding:2px 5px; margin-left:5px; border-radius:3px;">ADMIN</span>` : "";
+
+            let cmtHtml = `<div class="comment-section" style="margin-top:10px; border-top:1px solid #222; padding-top:5px;">`;
             if(p.comments) {
                 Object.values(p.comments).forEach(c => {
-                    cmtHtml += `<div class="comment-item"><b>${c.user}:</b> ${parseMentions(escapeHTML(c.text))}</div>`;
+                    cmtHtml += `<div style="font-size:12px; color:#aaa; margin-bottom:3px;"><b>${c.user}:</b> ${parseMentions(escapeHTML(c.text))}</div>`;
                 });
             }
             cmtHtml += `</div>`;
 
             const html = `
-                <div class="post">
-                    ${delBtn}
-                    <div class="post-user">${p.user} ${p.user === ADMIN_ID ? '<span class="admin-badge">ADMIN</span>' : ''}</div>
-                    <div>${parseMentions(escapeHTML(p.text))}</div>
-                    ${p.image ? `<img src="${escapeHTML(p.image)}">` : ""}
-                    ${cmtHtml}
-                    <div class="comment-input-box">
-                        <input type="text" id="cmt-${key}" placeholder="Reply...">
-                        <button onclick="addComment('${key}')">SEND</button>
-                    </div>
-                </div>`;
-            list.insertAdjacentHTML('afterbegin', html);
-        });
-    });
-
-    // Chat
-    db.ref('chat').limitToLast(20).on('child_added', s => {
-        const m = s.val(), key = s.key;
-        db.ref('users/' + m.user + '/avatar').once('value', av => {
-            const display = document.getElementById('chat-display');
-            const del = (currentUser === ADMIN_ID) ? `<span onclick="deleteData('chat/${key}')" style="cursor:pointer; color:red;">[X]</span> ` : "";
-            display.innerHTML += `<div><img src="${av.val()}" class="msg-avatar">${del}<b>${m.user}:</b> ${parseMentions(escapeHTML(m.text))}</div>`;
-            display.scrollTop = display.scrollHeight;
-            if (m.text.includes(`@${currentUser}`)) { document.getElementById('notif-sound').play(); }
-        });
-    });
-
-    // Online
-    db.ref('online').on('value', s => {
-        const inner = document.getElementById('users-inner');
-        inner.innerHTML = "";
-        if (s.exists()) Object.keys(s.val()).forEach(u => inner.innerHTML += `<div style="color:var(--cyan)">● ${u}</div>`);
-    });
-
-    db.ref('users/' + currentUser + '/avatar').on('value', s => document.getElementById('my-avatar').src = s.val());
-}
-
-// Actions
-function createPost() {
-    const t = document.getElementById('post-desc').value;
-    const i = document.getElementById('post-img-url').value;
-    if (t) { db.ref('posts').push({ user: currentUser, text: t, image: i }); document.getElementById('post-desc').value = ""; }
-}
-
-function addComment(id) {
-    const t = document.getElementById(`cmt-${id}`).value;
-    if (t) { db.ref(`posts/${id}/comments`).push({ user: currentUser, text: t }); }
-}
-
-function sendChat() {
-    const t = document.getElementById('chat-input').value;
-    if (t) { db.ref('chat').push({ user: currentUser, text: t }); document.getElementById('chat-input').value = ""; }
-}
-
-function updateProfile() {
-    const url = document.getElementById('avatar-input').value;
-    if (url) { db.ref('users/' + currentUser).update({ avatar: url }); alert("SYNCED"); }
-}
-
-function deleteData(path) { if(confirm("TERMINATE?")) db.ref(path).remove(); }
-
-// Matrix Effect
-const canvas = document.getElementById('matrix');
-const ctx = canvas.getContext('2d');
-canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-const drops = Array(Math.floor(canvas.width/16)).fill(1);
-setInterval(() => {
-    ctx.fillStyle = "rgba(0,0,0,0.1)"; ctx.fillRect(0,0,canvas.width,canvas.height);
-    ctx.fillStyle = "#f00";
-    drops.forEach((y, i) => {
-        ctx.fillText(String.fromCharCode(Math.random()*128), i*16, y*16);
-        if(y*16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-        drops[i]++;
-    });
-}, 35);
-        
+                <div class="post" style="background:#050505; border-left:3px solid red; padding:15px; margin-bottom:20px;">
+                    ${delBtn
