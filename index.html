@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>THE VOID | SYSTEM</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+</head>
+<body>
+    <canvas id="matrix"></canvas>
+
+    <div id="login-screen" class="box">
+        <h2>[ LOGIN ]</h2>
+        <input type="text" id="login-user" placeholder="USERNAME...">
+        <input type="password" id="login-pass" placeholder="PASSCODE...">
+        <button onclick="login()">ACCESS SYSTEM</button>
+        <p class="link" onclick="showRegister()">New Operator? Create Identity</p>
+    </div>
+
+    <div id="register-screen" class="box hidden">
+        <h2>[ REGISTER ]</h2>
+        <p style="font-size: 11px; color: #666;">Enter credentials to initialize identity</p>
+        <input type="text" id="reg-user" placeholder="CHOOSE USERNAME...">
+        <input type="password" id="reg-pass" placeholder="CREATE PASSCODE...">
+        <input type="email" id="reg-email" placeholder="ENCRYPTED EMAIL (Optional)...">
+        <button onclick="register()">INITIALIZE IDENTITY</button>
+        <p class="link" onclick="showLogin()">Back to Login</p>
+    </div>
+
+    <div id="main-system" class="hidden">
+        <h1 style="color:red; text-align:center;">SYSTEM ONLINE: <span id="op-name"></span></h1>
+        <div id="chat-box"></div>
+        <div class="input-row">
+            <input type="text" id="msg-input" placeholder="Broadcast message...">
+            <button onclick="sendMsg()">SEND</button>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
