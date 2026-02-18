@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE VOID | ALL-IN-ONE NETWORK</title>
+    <title>THE VOID | SECURE NETWORK</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
@@ -13,18 +13,18 @@
 
     <div id="auth-screen">
         <div id="login-box" class="box">
-            <h2>[ LOGIN ]</h2>
-            <input type="text" id="l-user" placeholder="USERNAME...">
-            <input type="password" id="l-pass" placeholder="PASSCODE...">
-            <button onclick="login()">ACCESS SYSTEM</button>
-            <p class="link" onclick="toggleAuth('reg')">Create New Identity</p>
+            <h2 style="color:var(--red); text-shadow: 0 0 10px red;">[ ENCRYPTED_LOGIN ]</h2>
+            <input type="text" id="l-user" placeholder="OPERATOR_ID">
+            <input type="password" id="l-pass" placeholder="ACCESS_CODE">
+            <button onclick="login()">DECRYPT & ENTER</button>
+            <p class="link" onclick="toggleAuth('reg')">Generate New Identity</p>
         </div>
         <div id="reg-box" class="box hidden">
-            <h2>[ REGISTER ]</h2>
-            <input type="text" id="r-user" placeholder="CHOOSE USERNAME...">
-            <input type="password" id="r-pass" placeholder="CREATE PASSCODE...">
+            <h2>[ REGISTER_ID ]</h2>
+            <input type="text" id="r-user" placeholder="NEW_ID">
+            <input type="password" id="r-pass" placeholder="NEW_PASSCODE">
             <button onclick="register()">INITIALIZE</button>
-            <p class="link" onclick="toggleAuth('login')">Back to Login</p>
+            <p class="link" onclick="toggleAuth('login')">Back to Terminal</p>
         </div>
     </div>
 
@@ -38,9 +38,9 @@
 
         <div id="feed-tab" class="container">
             <div class="input-card">
-                <textarea id="post-desc" placeholder="Broadcast to network..."></textarea>
-                <input type="text" id="post-img-url" placeholder="Image URL (Optional)...">
-                <button onclick="createPost()">POST</button>
+                <textarea id="post-desc" placeholder="Broadcast encrypted message..."></textarea>
+                <input type="text" id="post-img-url" placeholder="Media URL (Optional)">
+                <button onclick="createPost()">EXECUTE_BROADCAST</button>
             </div>
             <div id="feed-list"></div>
         </div>
@@ -49,12 +49,12 @@
             <div class="chat-layout">
                 <div id="chat-display"></div>
                 <div id="online-list">
-                    <h4>ONLINE</h4>
+                    <h4>NODE_ACTIVE</h4>
                     <div id="users-inner"></div>
                 </div>
             </div>
             <div class="chat-controls">
-                <input type="text" id="chat-input" placeholder="Secure message...">
+                <input type="text" id="chat-input" placeholder="Type secure message...">
                 <button onclick="sendChat()">SEND</button>
             </div>
         </div>
@@ -64,8 +64,8 @@
                 <div class="avatar-box"><img id="my-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"></div>
                 <h2 id="profile-name">---</h2>
                 <input type="text" id="avatar-input" placeholder="New Avatar URL...">
-                <button onclick="updateProfile()">UPDATE IDENTITY</button>
-                <button onclick="location.reload()" style="background:#222; color:#fff; margin-top:10px;">LOGOUT</button>
+                <button onclick="updateProfile()">UPDATE_IDENTITY</button>
+                <button onclick="location.reload()" style="background:#222; color:#555; margin-top:10px;">DISCONNECT</button>
             </div>
         </div>
     </div>
