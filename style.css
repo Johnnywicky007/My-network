@@ -1,19 +1,26 @@
-:root { --red: #ff0000; --bg: #000; }
-body { background: var(--bg); color: #fff; font-family: 'Courier New', monospace; margin: 0; overflow: hidden; }
+:root { --red: #ff0000; --bg: #000; --card: #0a0a0a; }
+body { background: var(--bg); color: #fff; font-family: 'Courier New', monospace; margin: 0; }
 canvas { position: fixed; top: 0; left: 0; z-index: -1; opacity: 0.3; }
 .hidden { display: none !important; }
 
-.box {
-    width: 350px; padding: 40px; background: rgba(0,0,0,0.95);
-    border: 1px solid var(--red); box-shadow: 0 0 20px var(--red);
-    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    text-align: center;
-}
+/* Navigation */
+.top-nav { background: #111; padding: 15px; border-bottom: 1px solid var(--red); display: flex; gap: 10px; align-items: center; position: sticky; top: 0; z-index: 10; }
+.top-nav button { width: auto; padding: 5px 15px; background: transparent; color: var(--red); border: 1px solid var(--red); cursor: pointer; }
+#user-tag { margin-left: auto; color: #00f3ff; font-size: 12px; }
 
-input { width: 100%; padding: 12px; margin: 10px 0; background: #050505; border: 1px solid #333; color: var(--red); box-sizing: border-box; outline: none; }
-button { width: 100%; padding: 12px; background: var(--red); color: #000; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; }
-.link { font-size: 12px; color: #555; cursor: pointer; margin-top: 15px; text-decoration: underline; }
+/* Layout */
+.container { max-width: 600px; margin: 20px auto; padding: 10px; height: 85vh; overflow-y: auto; }
+.box { width: 320px; padding: 30px; background: rgba(0,0,0,0.9); border: 1px solid var(--red); position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
 
-#main-system { padding: 40px; }
-#chat-box { height: 300px; border: 1px solid #222; background: #050505; margin-bottom: 10px; padding: 10px; overflow-y: auto; }
-.input-row { display: flex; gap: 10px; width: 100%; }
+/* Posts & Input */
+.input-card { background: var(--card); padding: 15px; border: 1px solid #222; margin-bottom: 20px; }
+textarea, input { width: 100%; padding: 10px; margin: 5px 0; background: #000; border: 1px solid #333; color: #fff; box-sizing: border-box; outline: none; }
+button { width: 100%; padding: 10px; background: var(--red); color: #000; border: none; font-weight: bold; cursor: pointer; }
+
+.post { background: var(--card); border: 1px solid #222; padding: 15px; margin-bottom: 15px; }
+.post img { max-width: 100%; border-radius: 4px; margin-top: 10px; }
+.post-user { color: var(--red); font-weight: bold; margin-bottom: 5px; }
+
+/* Chat */
+#chat-display { height: 70vh; border: 1px solid #222; background: #050505; padding: 15px; overflow-y: auto; margin-bottom: 10px; }
+.chat-controls { display: flex; gap: 5px; }
