@@ -12,7 +12,7 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 let currentUser = "";
-const ADMIN_ID = "ghost"; // Admin ID
+const ADMIN_ID = "Ghost"; // Admin ID
 
 // Utility Functions
 function escapeHTML(str) {
