@@ -3,44 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>THE VOID | SECURE NETWORK</title>
+    <title>THE VOID | TERMINAL</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
-<body>
+<body onload="checkSession()">
     <canvas id="matrix"></canvas>
 
     <div id="auth-screen">
         <div id="login-box" class="box">
-            <h2 style="color:var(--red); text-shadow: 0 0 10px red;">[ ENCRYPTED_LOGIN ]</h2>
-            <input type="text" id="l-user" placeholder="OPERATOR_ID">
-            <input type="password" id="l-pass" placeholder="ACCESS_CODE">
-            <button onclick="login()">DECRYPT & ENTER</button>
+            <h2>[ ACCESS_TERMINAL ]</h2>
+            <input type="text" id="l-user" placeholder="USER_ID">
+            <input type="password" id="l-pass" placeholder="PASSCODE">
+            <button onclick="login()">CONNECT</button>
             <p class="link" onclick="toggleAuth('reg')">Generate New Identity</p>
         </div>
         <div id="reg-box" class="box hidden">
-            <h2>[ REGISTER_ID ]</h2>
-            <input type="text" id="r-user" placeholder="NEW_ID">
-            <input type="password" id="r-pass" placeholder="NEW_PASSCODE">
+            <h2>[ REGISTER_NODE ]</h2>
+            <input type="text" id="r-user" placeholder="CHOOSE_ID">
+            <input type="password" id="r-pass" placeholder="CREATE_PASSCODE">
             <button onclick="register()">INITIALIZE</button>
-            <p class="link" onclick="toggleAuth('login')">Back to Terminal</p>
+            <p class="link" onclick="toggleAuth('login')">Return to Login</p>
         </div>
     </div>
 
     <div id="app-screen" class="hidden">
         <nav class="top-nav">
-            <button onclick="switchTab('feed')">FEED</button>
-            <button onclick="switchTab('chat')">CHAT</button>
-            <button onclick="switchTab('profile')">PROFILE</button>
+            <button onclick="switchTab('feed')">BROADCASTS</button>
+            <button onclick="switchTab('chat')">NODE_CHAT</button>
+            <button onclick="switchTab('profile')">IDENTITY</button>
             <span id="user-tag"></span>
         </nav>
 
         <div id="feed-tab" class="container">
             <div class="input-card">
-                <textarea id="post-desc" placeholder="Broadcast encrypted message..."></textarea>
-                <input type="text" id="post-img-url" placeholder="Media URL (Optional)">
-                <button onclick="createPost()">EXECUTE_BROADCAST</button>
+                <textarea id="post-desc" placeholder="Enter message for the void..."></textarea>
+                <input type="text" id="post-img-url" placeholder="Image URL (Optional)">
+                <button onclick="createPost()">EXECUTE</button>
             </div>
             <div id="feed-list"></div>
         </div>
@@ -49,23 +49,23 @@
             <div class="chat-layout">
                 <div id="chat-display"></div>
                 <div id="online-list">
-                    <h4>NODE_ACTIVE</h4>
+                    <h4>NODES_ONLINE</h4>
                     <div id="users-inner"></div>
                 </div>
             </div>
             <div class="chat-controls">
-                <input type="text" id="chat-input" placeholder="Type secure message...">
+                <input type="text" id="chat-input" placeholder="Secure signal...">
                 <button onclick="sendChat()">SEND</button>
             </div>
         </div>
 
         <div id="profile-tab" class="container hidden">
             <div class="profile-card">
-                <div class="avatar-box"><img id="my-avatar" src="https://cdn-icons-png.flaticon.com/512/149/149071.png"></div>
+                <div class="avatar-box"><img id="my-avatar" src=""></div>
                 <h2 id="profile-name">---</h2>
                 <input type="text" id="avatar-input" placeholder="New Avatar URL...">
-                <button onclick="updateProfile()">UPDATE_IDENTITY</button>
-                <button onclick="location.reload()" style="background:#222; color:#555; margin-top:10px;">DISCONNECT</button>
+                <button onclick="updateProfile()">UPDATE_DATA</button>
+                <button onclick="logout()" style="margin-top:20px; background:#222; color:red;">DISCONNECT</button>
             </div>
         </div>
     </div>
